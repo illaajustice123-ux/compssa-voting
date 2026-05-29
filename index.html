@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>COMPSSA Election 2026 - Tamale Technical University</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        * {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* MAIN BODY BACKGROUND */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            background-color: #1e293b; 
+        }
+
+        /* BACKGROUND IMAGE LAYER */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("images/1.webp") no-repeat center center;
+            background-size: cover; 
+            opacity: 0.15; 
+            z-index: -2;
+        }
+
+        /* BACKGROUND COLOR BLENDING OVERLAY */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
+            z-index: -1;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.4s ease-in;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0 { transform: rotate(0deg); }
+            100 { transform: rotate(360deg); }
+        }
+
+        .candidate-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            text-align: center;
+            min-height: 380px;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .candidate-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+            border-color: #667eea;
+        }
+
+        .candidate-card.selected {
+            border-color: #667eea;
+            background-color: #f3f4f6;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+            border-width: 3px;
+        }
+
+        .position-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+            border-top: 6px solid #667eea;
+        }
+
+        @media (min-width: 640px) {
+            .position-section {
+                padding: 32px 24px;
+            }
+        }
+
+        .position-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 16px;
+            border-left: 5px solid #667eea;
+            padding-left: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        @media (min-width: 640px) {
+            .position-title {
+                font-size: 24px;
+            }
+        }
+
+        .review-item {
+            background: #f9fafb;
+            border-left: 5px solid #667eea;
+            padding: 16px;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        /* PASSPORT PHOTO SIZE - RESPONSIVE MOBILE SIZING */
+        .profile-pic {
+            width: 130px;
+            height: 165px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 3px solid #667eea;
+            flex-shrink: 0;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+            background: #f3f4f6;
+        }
+
+        @media (min-width: 400px) {
+            .profile-pic {
+                width: 150px;
+                height: 190px;
+            }
+        }
+
+        .candidate-info {
+            width: 100%;
+        }
+
+        .candidate-name {
+            font-size: 15px;
+            font-weight: 800;
+            color: #1f2937;
+            margin: 6px 0 4px 0;
+            line-height: 1.3;
+        }
+
+        .candidate-position {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .candidate-radio {
+            width: 22px;
+            height: 22px;
+            accent-color: #667eea;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 15px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(102, 126, 234, 0.25);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 15px;
+        }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 16px;
+            text-align: center;
+        }
+
+        .header-title {
+            font-size: 22px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        @media (min-width: 640px) {
+            .header { padding: 20px; }
+            .header-title { font-size: 28px; }
+        }
+
+        .header-subtitle {
+            color: #555;
+            font-size: 13px;
+            margin: 2px 0 0 0;
+        }
+
+        .success-icon {
+            width: 70px;
+            height: 70px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 40px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            height: 5px;
+            background: rgba(102, 126, 234, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .abstain-btn {
+            background: #e5e7eb;
+            color: #374151;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin-top: 16px;
+            width: 100%;
+        }
+
+        .abstain-btn.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #380b0b;
+            border-left: 4px solid #dc2626;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 24px;
+            padding: 24px 20px;
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        @media (min-width: 640px) {
+            .login-card { padding: 36px; }
+        }
+
+        .login-card .login-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .brand-logo-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 4px;
+        }
+
+        .login-brand {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 20px;
+            font-weight: 900;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+            overflow: hidden;
+        }
+
+        .login-brand img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 4px;
+        }
+
+        .login-brand.dept-logo-bg {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.2);
+        }
+
+        .login-card .login-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #111827;
+            margin: 0;
+        }
+
+        .login-card .login-subtitle {
+            color: #4b5563;
+            font-size: 14px;
+            line-height: 1.5;
+            text-align: center;
+            max-width: 440px;
+        }
+
+        .login-card .form-group input {
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid #d1d5db;
+            background: #f8fafc;
+        }
+
+        .login-card .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12);
+        }
+
+        .login-card .btn-primary {
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+
+        /* DARK MODE IMPLEMENTATIONS */
+        body.dark-mode { background: #0f172a; }
+        body.dark-mode::before { opacity: 0.05; }
+        body.dark-mode::after {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(2, 6, 23, 0.99) 100%);
+        }
+
+        body.dark-mode .position-section,
+        body.dark-mode .bg-white,
+        body.dark-mode .login-card,
+        body.dark-mode .modal-content {
+            background: #1e293b !important;
+            color: #ffffff !important;
+            border-color: #334155 !important;
+        }
+
+        body.dark-mode .header {
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+        }
+
+        body.dark-mode .header-title { color: #f1f1f1; }
+        body.dark-mode .header-subtitle,
+        body.dark-mode .text-gray-600,
+        body.dark-mode .text-gray-500,
+        body.dark-mode p { color: #cbd5e1; }
+
+        body.dark-mode .candidate-card {
+            background: #1e293b;
+            border-color: #334155;
+            color: #f3f4f6;
+        }
+        body.dark-mode .candidate-card.selected {
+            background: #334155;
+            border-color: #667eea;
+        }
+
+        body.dark-mode .form-group label { color: #f3f4f6; }
+        body.dark-mode .form-group input {
+            background: #334155;
+            border-color: #475569;
+            color: #f3f4f6;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 6px 14px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            z-index: 100;
+        }
+
+        body.dark-mode .theme-toggle {
+            background: #1e293b;
+            color: #fbbf24;
+            border-color: #334155;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal.show { display: flex; }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            width: 100%;
+            max-width: 450px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+            color: #6b7280;
+            background: none;
+            border: none;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        body.dark-mode .stats-card { background: #1e293b; }
+        .stats-number {
+            font-size: 28px;
+            font-weight: 800;
+            color: #667eea;
+            margin: 6px 0;
+        }
+        .stats-label {
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .results-chart {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        body.dark-mode .results-chart { background: #1e293b; }
+
+        .countdown {
+            font-size: 24px;
+            font-weight: 800;
+            color: #dc2626;
+            text-align: center;
+            margin: 16px 0;
+        }
+
+        .faq-item {
+            background: #f9fafb;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border-left: 4px solid #667eea;
+        }
+
+        body.dark-mode .faq-item { background: #334155; }
+        .faq-item h4 { margin: 0; font-weight: 600; color: #1f2937; font-size: 15px; }
+        body.dark-mode .faq-item h4 { color: #f3f4f6; }
+        .faq-item.active p { display: block; margin-top: 8px; color: #6b7280; font-size: 14px; }
+        .faq-item p { display: none; margin: 0; }
+        body.dark-mode .faq-item p { color: #cbd5e1; }
+    </style>
+</head>
+
+<body class="pt-12">
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+
+    <div id="homeScreen" class="screen active">
+        <div class="header">
+            <h1 class="header-title">COMPSSA Election 2026</h1>
+            <p class="header-subtitle">Computer Science Students Association</p>
+            <p class="header-subtitle">Tamale Technical University</p>
+        </div>
+
+        <div class="flex items-center justify-center px-4 py-6">
+            <div class="w-full max-w-md">
+                <div class="login-card text-center">
+                    <div class="login-header">
+                        <div class="brand-logo-wrapper">
+                            <div class="login-brand">
+                                <img src="images/LOGO.jpg" alt="TaTU Logo" onerror="this.style.display='none'; this.parentNode.innerHTML='TaTU';" />
+                            </div>
+                            <div class="login-brand dept-logo-bg">
+                                <img src="images/1.webp" alt="Dept Logo" onerror="this.style.display='none'; this.parentNode.innerHTML='CSSA';" />
+                            </div>
+                        </div>
+                        <h2 class="login-title">Secure Voting Portal</h2>
+                        <p class="login-subtitle">
+                            Welcome to the COMPSSA Elections. Cast your vote securely below.
+                        </p>
+                    </div>
+                    
+                    <div class="countdown" id="votingCountdown">Voting Closes Soon</div>
+
+                    <button class="btn-primary w-full text-lg mt-4" onclick="switchScreen('loginScreen')">
+                        Vote Now
+                    </button>
+
+                    <div class="grid grid-cols-3 gap-2 mt-6">
+                        <button class="btn-secondary text-xs px-1 py-2.5" onclick="switchScreen('faqScreen')">
+                            ❓ FAQ
+                        </button>
+                        <button class="btn-secondary text-xs px-1 py-2.5" onclick="switchScreen('resultsScreen')">
+                            📊 Results
+                        </button>
+                        <button class="btn-secondary text-xs px-1 py-2.5" onclick="showAdminLogin()">
+                            🔐 Admin
+                        </button>
+                    </div>
+
+                    <p class="text-xs text-gray-500 mt-6">
+                        One person, one vote. Your vote is secure and anonymous.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loginScreen" class="screen">
+        <div class="header">
+            <h1 class="header-title">Voter Login</h1>
+            <p class="header-subtitle">Sign in to access the ballot registry</p>
+        </div>
+
+        <div class="flex items-center justify-center px-4 py-6">
+            <div class="w-full max-w-md">
+                <div class="login-card text-center">
+                    <form id="loginForm" onsubmit="handleLogin(event)">
+                        <div class="mb-4 text-left form-group">
+                            <label for="fullname">Full Name (As registered)</label>
+                            <input type="text" id="fullname" placeholder="Your full name" required />
+                        </div>
+                        <div class="mb-6 text-left form-group">
+                            <label for="indexNumber">Index/Student Number</label>
+                            <input type="text" id="indexNumber" placeholder="e.g., BTIT250001" required />
+                        </div>
+                        <div id="loginError" class="text-sm text-red-600 mb-4 bg-red-50 p-2.5 rounded border border-red-200 hidden"></div>
+                        <button type="submit" class="btn-primary w-full text-lg">
+                            Continue to Ballot
+                        </button>
+                    </form>
+
+                    <button class="btn-secondary w-full mt-4 text-sm" onclick="switchScreen('homeScreen')">
+                        Back to Home
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="ballotScreen" class="screen">
+        <div class="header">
+            <h1 class="header-title">Cast Your Vote</h1>
+            <p class="header-subtitle">COMPSSA Student Executive Choices</p>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <div class="px-4 py-6">
+            <div class="max-w-5xl mx-auto pb-24">
+                <div id="positionsContainer"></div>
+
+                <div class="flex gap-3 mt-6 justify-center fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 p-4 border-t border-gray-200 dark:border-slate-800 z-40 shadow-[0_-4px_12px_rgba(0,0,0,0.1)]">
+                    <button class="btn-secondary flex-1 max-w-[160px]" onclick="returnToHome()">
+                        Logout
+                    </button>
+                    <button class="btn-primary flex-1 max-w-[200px]" id="proceedBtn" onclick="switchScreen('reviewScreen')" disabled>
+                        Review Votes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="reviewScreen" class="screen">
+        <div class="header">
+            <h1 class="header-title">Review Your Vote</h1>
+            <p class="header-subtitle">Please confirm your selections before submission</p>
+        </div>
+
+        <div class="px-4 py-6">
+            <div class="max-w-2xl mx-auto pb-8">
+                <div id="reviewContainer" class="bg-white rounded-xl shadow-lg p-5 mb-6"></div>
+
+                <div class="flex gap-4 justify-center">
+                    <button class="btn-secondary flex-1" onclick="switchScreen('ballotScreen')">
+                        Edit Votes
+                    </button>
+                    <button class="btn-primary flex-1" onclick="submitVote()">
+                        Confirm & Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="successScreen" class="screen">
+        <div class="header">
+            <h1 class="header-title">Vote Cast Successfully</h1>
+            <p class="header-subtitle">Thank you for participating in COMPSSA Elections</p>
+        </div>
+
+        <div class="flex items-center justify-center px-4 py-6">
+            <div class="w-full max-w-md">
+                <div class="login-card text-center">
+                    <div class="success-icon">✓</div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2 dark:text-white">Thank You!</h2>
+                    <p class="text-gray-600 mb-4 dark:text-slate-300 text-sm">Your vote has been securely cast and recorded anonymously.</p>
+
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-3.5 mb-6 rounded text-left dark:bg-slate-800">
+                        <p class="text-xs text-gray-700 dark:text-slate-200">
+                            <strong>Voting Receipt ID:</strong><br />
+                            <span id="refNumber" class="font-mono text-sm text-blue-600 dark:text-sky-400"></span>
+                        </p>
+                    </div>
+
+                    <button class="btn-primary w-full text-base mb-3" onclick="returnToHome()">
+                        Return to Home
+                    </button>
+
+                    <button class="btn-secondary w-full text-base" onclick="switchScreen('resultsScreen')">
+                        📊 Live Results
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="faqScreen" class="screen">
+        <div class="header">
+            <h1 class="header-title">Frequently Asked Questions</h1>
+            <p class="header-subtitle">Help with the system</p>
+        </div>
+
+        <div class="px-4 py-6">
+            <div class="max-w-2xl mx-auto pb-8">
+                <div class="bg-white rounded-xl shadow-lg p-5">
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <h4>How do I start voting?</h4>
+                        <p>Click the Vote Now button on the home screen and enter your registry full name and index number to pull up your empty ballot.</p>
+                    </div>
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <h4>Can I change my vote after submitting?</h4>
+                        <p>No, once you click submit and clear the confirmation step, it locks completely. Review your choices carefully.</p>
+                    </div>
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <h4>What does "Abstain" mean?</h4>
+                        <p>Abstaining means choosing not to choose any of the running candidates for that single spot. It is skipped safely.</p>
+                    </div>
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <h4>Is my vote secret?</h4>
+                        <p>Yes, totally anonymous. The system registers that your Index Number voted, but breaks your choices away into a blind dynamic tally.</p>
+                    </div>
+
+                    <button class="btn-primary w-full mt-6" onclick="switchScreen('homeScreen')">
+                        Back to Home
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="resultsScreen" class="screen">
+        <div class="header">
+            <h1 class="header-title">Election Results</h1>
+            <p class="header-subtitle">Live vote tallies</p>
+        </div>
+
+        <div class="px-4 py-6">
+            <div class="max-w-4xl mx-auto pb-8">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                    <div class="stats-card">
+                        <div class="stats-label">Total Registered</div>
+                        <div class="stats-number" id="totalVoters">0</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-label">Votes Cast</div>
+                        <div class="stats-number" id="votesCast">0</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-label">Turnout</div>
+                        <div class="stats-number" id="turnout">0%</div>
+                    </div>
+                </div>
+
+                <div id="resultsContainer"></div>
+
+                <button class="btn-primary w-full py-3.5" onclick="downloadResults()">
+                    📥 Download Results (CSV)
+                </button>
+
+                <button class="btn-secondary w-full mt-3 py-3.5" onclick="switchScreen('homeScreen')">
+                    Back to Home
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="adminScreen" class="screen">
+        <div class="header">
+            <h1 class="header-title">Admin Dashboard</h1>
+            <p class="header-subtitle">Registry & Audit Tracker</p>
+        </div>
+
+        <div class="px-4 py-6">
+            <div class="max-w-5xl mx-auto pb-8">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+                    <div class="stats-card">
+                        <div class="stats-label">Eligible</div>
+                        <div class="stats-number" id="adminEligible">0</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-label">Cast</div>
+                        <div class="stats-number" id="adminVotesCast">0</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-label">Turnout %</div>
+                        <div class="stats-number" id="adminTurnout">0%</div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-label">Remaining</div>
+                        <div class="stats-number" id="adminRemaining">0</div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-5 mb-6">
+                    <h3 class="text-lg font-bold mb-3">Live Voter Logs</h3>
+                    <div id="votersList" class="space-y-2 max-h-72 overflow-y-auto pr-1"></div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button class="btn-primary flex-1" onclick="refreshStats()">
+                        🔄 Refresh Stats
+                    </button>
+                    <button class="btn-secondary flex-1" onclick="exportVoterLog()">
+                        📊 Export Voter Log
+                    </button>
+                    <button class="btn-secondary flex-1" onclick="switchScreen('homeScreen')">
+                        Back Home
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loadingModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 text-center max-w-xs mx-4">
+            <div class="spinner mx-auto mb-3"></div>
+            <p class="text-gray-700 font-semibold text-sm">Processing security keys...</p>
+        </div>
+    </div>
+
+    <script>
+        const positions = [
+            {
+                id: 'president',
+                title: 'President',
+                candidates: [
+                    { id: 'p1', name: 'Alidu Abdul Fatawu', photo: 'images/2.jpg', motto: '#FOWARD TOGETHER.' },
+                    { id: 'p2', name: 'Abu Saiq Abunawas', photo: 'images/3.jpg', motto: 'Build the future starting now.' },
+                ]
+            },
+            {
+                id: 'vicepresident',
+                title: 'Vice President',
+                candidates: [
+                    { id: 'vp1', name: 'Habibu Ali Dalabra', photo: 'images/4.jpg', motto: 'Strong leaders build more leaders, not more followers.' },
+                    { id: 'vp2', name: 'Ewura Abdul-Aziz Iddrisu', photo: 'images/V.jpeg', motto: 'Entertain with purpose.' }
+                ]
+            },
+            {
+                id: 'finsecretary',
+                title: 'Financial Secretary',
+                candidates: [
+                    { id: 'fs1', name: 'Sunkpen Sadiq', photo: 'images/FFF.jpg', motto: 'To lead by example.' },
+                    { id: 'fs2', name: 'Osman Banaanwine Adams', photo: 'images/f.jpeg', motto: 'Transparency and accountabilty.' },
+                    { id: 'fs3', name: 'Yahaya Ishaw', photo: 'images/FF.jpg', motto: 'Integrity in finance, Progress for all.' }
+                ]
+            },
+            {
+                id: 'generalsecretary',
+                title: 'General Secretary',
+                candidates: [
+                    { id: 'gs1', name: 'Fuseini Alhassan', photo: 'images/5.jpeg', motto: 'Serve for the people with passion.' },
+                    { id: 'gs2', name: 'Albert Mensah', photo: 'images/albert.jpg', motto: 'Experienced in administration and record keeping.' }
+                ]
+            },
+            {
+                id: 'womenscommissioner',
+                title: "Women's Commissioner",
+                candidates: [
+                    { id: 'wc1', name: 'Issah Zeinab', photo: 'images/W.jpg', motto: 'Empower women to thrive in Tech and leadership, the whole community moves forward..' },
+                    { id: 'wc2', name: 'Albert Mensah', photo: 'images/albert.jpg', motto: 'and committed to women development programs.' }
+                ]
+            },
+            {
+                id: 'organizer',
+                title: 'Organizer',
+                candidates: [
+                    { id: 'org1', name: 'Patricia Owusu', photo: 'images/patricia.jpg', motto: 'Creative event organizer with proven success.' },
+                    { id: 'org2', name: 'David Owiredu', photo: 'images/david.jpg', motto: 'Tech-savvy event coordinator.' },
+                    { id: 'org3', name: 'Gloria Mensah', photo: 'images/gloria.jpg', motto: 'Excellent communicator and team player.' }
+                ]
+            },
+            {
+                id: 'pro',
+                title: 'Public Relations Officer (PRO)',
+                candidates: [
+                    { id: 'pro1', name: 'Abubakari Imoro', photo: 'images/p.jpeg', motto: 'Experienced in public speaking and communication.' },
+                    { id: 'pro2', name: 'Anthony Aang Paugnaalong Nyamentoma', photo: 'images/pro.jpeg', motto: 'Your voice, our vision.' }
+                ]
+            },
+            {
+                id: 'sportssecretary',
+                title: 'Sports Secretary',
+                candidates: [
+                    { id: 'ss1', name: 'Alhassan Abdul-Rahaman', photo: 'images/s.jpeg', motto: 'TEAM RED-Together we can.' },
+                    { id: 'ss2', name: 'Hellu Stephen', photo: 'images/ss.jpeg', motto: 'LetDoItTogether.' }
+                ]
+            }
+        ];
+
+        let votes = { president: null, vicepresident: null, finsecretary: null, generalsecretary: null, womenscommissioner: null, organizer: null, pro: null, sportssecretary: null };
+        let currentUser = null;
+
+        const approvedStudents = [
+          { fullName: "Bidoklan Yajasan", indexNumber: "BTIT250001" },
+          { fullName: "Majeed Abdul Wadudu", indexNumber: "BTIT250002" },
+          { fullName: "Issah Mutada", indexNumber: "BTIT250003" },
+          { fullName: "Hadi Shaibu", indexNumber: "BTIT250004" },
+          { fullName: "Mohammed Khadijah", indexNumber: "BTIT250006" },
+          { fullName: "Bo-i Collins Malkum", indexNumber: "BTIT250007" },
+          { fullName: "Dogbey Kennedy Dzifa Malik", indexNumber: "BTIT250008" },
+          { fullName: "Abdul Kadir Zulaiha", indexNumber: "BTIT250011" },
+          { fullName: "Alhassan Abdul-shakun", indexNumber: "BTIT250012" },
+          { fullName: "Osman Hudu", indexNumber: "BTIT250013" },
+          { fullName: "Dujing Domah Paul", indexNumber: "BTIT250014" },
+          { fullName: "Adam Alhassan Abdul Alim", indexNumber: "BTIT250015" },
+          { fullName: "Wusah Felicia Bavug", indexNumber: "BTIT250016" },
+          { fullName: "Fuseini Abdul-manan", indexNumber: "BTIT250017" },
+          { fullName: "Mumuni Yussif", indexNumber: "BTIT250018" },
+          { fullName: "Abdul Razak Ahmed Zaidan", indexNumber: "BTIT250019" },
+          { fullName: "Bawa Ishaw", indexNumber: "BTIT250021" },
+          { fullName: "Mahamud Shahaban", indexNumber: "BTIT250023" },
+          { fullName: "Rafiu Inusah", indexNumber: "BTIT250024" },
+          { fullName: "Alhassan Hamza", indexNumber: "BTIT250025" },
+          { fullName: "Andani Hidr", indexNumber: "BTIT250026" },
+          { fullName: "Yakubu Alhassan", indexNumber: "BTIT250028" },
+          { fullName: "Ziblim Suabira", indexNumber: "BTIT250030" },
+          { fullName: "Zakaria Habibu", indexNumber: "BTIT250031" },
+          { fullName: "Tia Iddrisu", indexNumber: "BTIT250032" },
+          { fullName: "Alhassan Shahadu", indexNumber: "BTIT250033" },
+          { fullName: "Abdulai Ibrahim", indexNumber: "BTIT250035" },
+          { fullName: "N Joku Salifu Golden", indexNumber: "BTIT250036" },
+          { fullName: "Issah Mohammed Mashud", indexNumber: "BTIT250037" },
+          { fullName: "Ibrahim Nazihatu", indexNumber: "BTIT250038" },
+          { fullName: "Alagbara Saani Saeed", indexNumber: "BTIT250040" },
+          { fullName: "Akuba Elisha", indexNumber: "BTIT250041" },
+          { fullName: "Lukman Abdul Basit", indexNumber: "BTIT250042" },
+          { fullName: "Ahmed Abdul Hakim Katali", indexNumber: "BTIT250043" },
+          { fullName: "Abdul Fataw Salman Maltiti", indexNumber: "BTIT250044" },
+          { fullName: "Alhassan Abdulai", indexNumber: "BTIT250045" },
+          { fullName: "Sayibu Yussif", indexNumber: "BTIT250046" },
+          { fullName: "Abdul Fatawu Ibrahim Mumbiyeli", indexNumber: "BTIT250047" },
+          { fullName: "Adoa Francis Awiah", indexNumber: "BTIT250049" },
+          { fullName: "Amidu Sadiq", indexNumber: "BTIT250052" },
+          { fullName: "Gbeadese Kassim Latif", indexNumber: "BTIT250053" },
+          { fullName: "Fusheini Alaru Solawudeen Nasara", indexNumber: "BTIT250054" },
+          { fullName: "Osman Abdul-rashid Tunteeya", indexNumber: "BTIT250055" },
+          { fullName: "Korsah Frederick Akofu", indexNumber: "BTIT250056" },
+          { fullName: "Mumuni Abdul Mubarik", indexNumber: "BTIT250057" },
+          { fullName: "Abdul-aziz Nawaf", indexNumber: "BTIT250058" },
+          { fullName: "Alhassan Abdul Mumin Shegu", indexNumber: "BTIT250060" },
+          { fullName: "Obeng Henry", indexNumber: "BTIT250062" },
+          { fullName: "Alhassan Imrana Suhuyini", indexNumber: "BTIT250063" },
+          { fullName: "Wassah Jerome", indexNumber: "BTIT250064" },
+          { fullName: "Mustapha Sulemana", indexNumber: "BTIT250065" },
+          { fullName: "Abdul-malik Shamsiyatu", indexNumber: "BTIT250066" },
+          { fullName: "Rufai Akade", indexNumber: "BTIT250067" },
+          { fullName: "Issah Hamad", indexNumber: "BTIT250068" },
+          { fullName: "Sayibu Hudu", indexNumber: "BTIT250069" },
+          { fullName: "Biyam Taapis Rita", indexNumber: "BTIT250070" },
+          { fullName: "Karim Yasir Arafat Sokowuli", indexNumber: "BTIT250072" },
+          { fullName: "Adam Ibrahim", indexNumber: "BTIT250073" },
+          { fullName: "Sulemana Abdul Rafiu", indexNumber: "BTIT250074" },
+          { fullName: "Abu Abdul-rahman", indexNumber: "BTIT250075" },
+          { fullName: "Sulemana Abdul Haaliq", indexNumber: "BTIT250076" },
+          { fullName: "Issah Abdul-rahim", indexNumber: "BTIT250077" },
+          { fullName: "Abdul-rashid Mas-ud", indexNumber: "BTIT250078" },
+          { fullName: "Iddrisu Ganiu", indexNumber: "BTIT250080" },
+          { fullName: "Yambor Joseph Yenube", indexNumber: "BTIT250081" },
+          { fullName: "Jabab Timothy Tisinbon", indexNumber: "BTIT250082" },
+          { fullName: "Azumah Fusheini Ibrahim", indexNumber: "BTIT250085" },
+          { fullName: "Abubakari Iliasu", indexNumber: "BTIT250087" },
+          { fullName: "Alidu Abdul-mumin", indexNumber: "BTIT250089" },
+          { fullName: "Bashiru Abdul-kadir", indexNumber: "BTIT250090" },
+          { fullName: "Iddrisu Abdul-rahaman", indexNumber: "BTIT250091" },
+          { fullName: "Alhassan Abdul Razak", indexNumber: "BTIT250092" },
+          { fullName: "Zakaria Abu Hanifa", indexNumber: "BTIT250096" },
+          { fullName: "Osman Jafaru", indexNumber: "BTIT250097" },
+          { fullName: "Mohammed Isshak", indexNumber: "BTIT250098" },
+          { fullName: "Dekowine Daniel Samba", indexNumber: "BTIT250099" },
+          { fullName: "Inusah Madia", indexNumber: "BTIT250100" },
+          { fullName: "Abubakari Amadu", indexNumber: "BTIT250101" },
+          { fullName: "Adam Siisu", indexNumber: "BTIT250102" },
+          { fullName: "Sanjage Benjamin", indexNumber: "BTIT250106" },
+          { fullName: "Mohammed Salman Ibn", indexNumber: "BTIT250107" },
+          { fullName: "Abubakari Shaima", indexNumber: "BTIT250109" },
+          { fullName: "Nazzah Wisdom Dela", indexNumber: "BTIT250110" },
+          { fullName: "Soyoro Solomon", indexNumber: "BTIT250111" },
+          { fullName: "Tonzua Imoro Abass", indexNumber: "BTIT250112" },
+          { fullName: "Ibrahim Kabiru", indexNumber: "BTIT250115" },
+          { fullName: "Achaana Nathaniel", indexNumber: "BTIT250116" },
+          { fullName: "Mohammed Mansuru Wunnam", indexNumber: "BTIT250119" },
+          { fullName: "Issahaku Abdul Kudus Yelpala", indexNumber: "BTIT250121" },
+          { fullName: "Yakubu Sulemana", indexNumber: "BTIT250124" },
+          { fullName: "Issah Shafiq", indexNumber: "BTIT250125" },
+          { fullName: "Alhassan Mohammed", indexNumber: "BTIT250127" },
+          { fullName: "Tulo Felicity", indexNumber: "BTIT250128" },
+          { fullName: "Mapiin Bright Yoobaat", indexNumber: "BTIT250131" },
+          { fullName: "Yahaya Saabit", indexNumber: "BTIT250133" },
+          { fullName: "Ahmed Saleem Banbebu", indexNumber: "BTIT250136" },
+          { fullName: "Zakaria Mohammed Awal", indexNumber: "BTIT250138" },
+          { fullName: "Iddrisu Malik", indexNumber: "BTIT250141" },
+          { fullName: "Daa Abraham", indexNumber: "BTIT250144" },
+          { fullName: "Abubakari Abdul-jalil", indexNumber: "BTIT250145" },
+          { fullName: "Abubakari Sadik Suraiya", indexNumber: "BTIT250153" },
+          { fullName: "Bikalga Abraham", indexNumber: "BTIT250154" },
+          { fullName: "Sam-an Musah", indexNumber: "BTIT250158" },
+          { fullName: "Fuseini Alhassan", indexNumber: "BTIT250160" },
+          { fullName: "Muftawo Fatawo Amidu", indexNumber: "BTIT250163" },
+          { fullName: "Abdul-rauf Abdul-fatawu", indexNumber: "BTIT250168" },
+          { fullName: "Amedorme Cornelius Selorm", indexNumber: "BTIT250169" },
+          { fullName: "Abubakari Abdul Basit Tariwindhi", indexNumber: "BTIT250170" },
+          { fullName: "Nassam Osman", indexNumber: "BTIT250171" },
+          { fullName: "Awuni Michael Apαna", indexNumber: "BTIT250175" },
+          { fullName: "Jibril Suabidatu Kanyita", indexNumber: "BTIT250180" },
+          { fullName: "Abubakari Yakubu", indexNumber: "BTIT250181" },
+          { fullName: "Yakubu Mohammed", indexNumber: "BTIT250185" },
+          { fullName: "Murtala Shamuna Atabya", indexNumber: "BTIT250186" },
+          { fullName: "Samuel Marvellous Chiedozie", indexNumber: "BTIT250187" },
+          { fullName: "Ibrahim Abdul Latif", indexNumber: "BTIT250191" },
+          { fullName: "Haruna Abdul Kadir Wuniche", indexNumber: "BTIT250195" },
+          { fullName: "Hamza Abdul-mumin", indexNumber: "BTIT250202" },
+          { fullName: "Duut Danladi Joshua", indexNumber: "BTIT250204" },
+          { fullName: "Fuseini Habib", indexNumber: "BTIT250205" },
+          { fullName: "Alhassan Faisal Suhuyini", indexNumber: "BTIT250206" },
+          { fullName: "Alhassan Abdul-shakuru", indexNumber: "BTIT250212" },
+          { fullName: "Mohammed Sherifatu Deishini", indexNumber: "BTIT250214" },
+          { fullName: "Sayibu Timtooni Abubakari-sadiik", indexNumber: "BTIT250219" },
+          { fullName: "Fonjegeba Kingsley", indexNumber: "BTIT250220" },
+          { fullName: "Agyekum Alex", indexNumber: "BTIT250223" },
+          { fullName: "Ahmed Samir Abdel Salam Abdel Hady", indexNumber: "BTIT250225" },
+          { fullName: "Abubakari Abdul-rafiu", indexNumber: "BTIT250227" },
+          { fullName: "Baba Abdul Ganiu", indexNumber: "BTIT250232" },
+          { fullName: "Ayeng Clifford Kwabena", indexNumber: "BTIT250233" },
+          { fullName: "Salifu Rafik", indexNumber: "BTIT250237" },
+          { fullName: "Abdul Malik Barikisu", indexNumber: "BTIT250241" },
+          { fullName: "Seidu Mohammed", indexNumber: "BTIT250250" },
+          { fullName: "Mensah Emmanuel Michael", indexNumber: "BTIT250260" },
+          { fullName: "Yidana Clement", indexNumber: "BTIT250263" },
+          { fullName: "Haruna Abdul Rahaman", indexNumber: "BTIT250264" },
+          { fullName: "Alhassan Zakaria", indexNumber: "BTIT250268" },
+          { fullName: "Iddrisu Mohammed Firdaws", indexNumber: "BTIT250270" },
+          { fullName: "Abdallah Saeed Mbiniwaya", indexNumber: "BTIT250273" },
+          { fullName: "Shiraz Sulemana", indexNumber: "BTIT250274" },
+          { fullName: "Bafanayaa Richard", indexNumber: "BTIT250275" },
+          { fullName: "Lambon Peter", indexNumber: "BTIT250279" },
+          { fullName: "Iddrisu Abdul-rashid", indexNumber: "BTIT250281" },
+          { fullName: "Abubakari Rahim Nindow", indexNumber: "BTIT250288" },
+          { fullName: "Abukari Alhassan", indexNumber: "BTIT250289" },
+          { fullName: "Abdulai Yakubu Wunnam", indexNumber: "BTIT250291" },
+          { fullName: "Yeboah Dominic", indexNumber: "BTIT250294" },
+          { fullName: "Abdulai Abdul-kahad", indexNumber: "BTIT250296" },
+          { fullName: "Mikail Muhammad Gadafi", indexNumber: "BTIT250302" },
+          { fullName: "Ahado Daniel Kwabla", indexNumber: "BTIT250304" },
+          { fullName: "Atanga Moses Anamoo", indexNumber: "BTIT250305" },
+          { fullName: "Salifu Abdul-wahab", indexNumber: "BTIT250312" },
+          { fullName: "Mudasir Abdul Rasheed", indexNumber: "BTIT250317" },
+          { fullName: "Musah Mohammed-aminu Timbillah", indexNumber: "BTIT250321" },
+          { fullName: "Iddrissu Yussif", indexNumber: "BTIT250325" },
+          { fullName: "Abdul Somed Abdul Kudus", indexNumber: "BTIT250326" },
+          { fullName: "Alhassan Nashiru", indexNumber: "BTIT250327" },
+          { fullName: "Alhassan Ibrahim", indexNumber: "BTIT250334" },
+          { fullName: "Mohammed Saani Ahmed Gazale", indexNumber: "BTIT250343" },
+          { fullName: "Abdul Hanan Tahiru", indexNumber: "BTIT250347" },
+          { fullName: "Abdul Latif Yussif", indexNumber: "BTIT250349" },
+          { fullName: "Adam Alhassan", indexNumber: "BTIT250402" },
+          { fullName: "Sulemana Firdaus", indexNumber: "BTIT250404" },
+          { fullName: "Yahuza Shawkia", indexNumber: "BTIT250405" },
+          { fullName: "Ibrahim Ruhaimatu", indexNumber: "BTIT250407" },
+          { fullName: "Osman Abdul Halim Suhuyini", indexNumber: "BTIT250408" },
+          { fullName: "Fuseini Mohammed Gadafi", indexNumber: "BTIT250409" },
+          { fullName: "Abdul Majeed Musah", indexNumber: "BTIT250410" },
+          { fullName: "Dennis Awure", indexNumber: "BTIT250411" },
+          { fullName: "Mohammed Mashud", indexNumber: "" },
+          { fullName: "Zuberu Abdul-jalil", indexNumber: "" },
+          { fullName: "Rafiu Mohammed Qauthan", indexNumber: "" }
+        ];
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo(0, 0);
+
+            if (screenId === 'ballotScreen') {
+                renderBallot();
+            } else if (screenId === 'reviewScreen') {
+                renderReview();
+            } else if (screenId === 'resultsScreen') {
+                displayResults();
+            } else if (screenId === 'adminScreen') {
+                refreshStats();
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const btn = document.querySelector('.theme-toggle');
+            if (document.body.classList.contains('dark-mode')) {
+                btn.innerHTML = '☀️ Light Mode';
+            } else {
+                btn.innerHTML = '🌙 Dark Mode';
+            }
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const fullname = document.getElementById('fullname').value.trim();
+            const indexNum = document.getElementById('indexNumber').value.trim().toUpperCase();
+            const errorDiv = document.getElementById('loginError');
+
+            const student = approvedStudents.find(s => 
+                s.fullName.toLowerCase() === fullname.toLowerCase() && 
+                s.indexNumber.toUpperCase() === indexNum
+            );
+
+            if (!student) {
+                errorDiv.textContent = "Access Denied: Full name or Index Number not found in clearance database.";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            const votedStudents = JSON.parse(localStorage.getItem('cssa_voted') || '[]');
+            if (votedStudents.includes(student.indexNumber)) {
+                errorDiv.textContent = "Access Denied: This student identity has already voted.";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            currentUser = student;
+            errorDiv.classList.add('hidden');
+            switchScreen('ballotScreen');
+        }
+
+        function renderBallot() {
+            const container = document.getElementById('positionsContainer');
+            container.innerHTML = '';
+
+            positions.forEach(position => {
+                const posSection = document.createElement('div');
+                posSection.className = 'position-section';
+
+                let html = `
+                    <div class="position-title">${position.title}</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                `;
+
+                position.candidates.filter(c => c.name !== "").forEach(candidate => {
+                    const isSelected = votes[position.id] === candidate.id;
+                    html += `
+                        <div class="candidate-card ${isSelected ? 'selected' : ''}" onclick="selectCandidate('${position.id}', '${candidate.id}')">
+                            <img src="${candidate.photo}" alt="${candidate.name}" class="profile-pic" onerror="this.src='images/default.jpg';" />
+                            <div class="candidate-info">
+                                <h4 class="candidate-name">${candidate.name}</h4>
+                                <p class="text-xs italic text-indigo-600 font-semibold mb-1">"${candidate.motto}"</p>
+                            </div>
+                            <input type="radio" name="${position.id}" class="candidate-radio" ${isSelected ? 'checked' : ''} readOnly />
+                        </div>
+                    `;
+                });
+
+                const isAbstain = votes[position.id] === 'abstain';
+                html += `
+                    </div>
+                    <button class="abstain-btn ${isAbstain ? 'selected' : ''}" onclick="selectCandidate('${position.id}', 'abstain')">
+                        ${isAbstain ? '✓ Abstaining from this position' : 'Abstain from voting for this position'}
+                    </button>
+                `;
+
+                posSection.innerHTML = html;
+                container.appendChild(posSection);
+            });
+
+            validateBallotProgress();
+        }
+
+        function selectCandidate(positionId, candidateId) {
+            votes[positionId] = candidateId;
+            renderBallot();
+        }
+
+        function validateBallotProgress() {
+            const allAnswered = positions.every(pos => votes[pos.id] !== null);
+            document.getElementById('proceedBtn').disabled = !allAnswered;
+
+            const answeredCount = positions.filter(pos => votes[pos.id] !== null).length;
+            const progressPct = Math.round((answeredCount / positions.length) * 100);
+            document.querySelector('#ballotScreen .progress-fill').style.width = progressPct + '%';
+        }
+
+        function renderReview() {
+            const container = document.getElementById('reviewContainer');
+            container.innerHTML = '<h3 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2 dark:text-white">Review Summary:</h3>';
+
+            positions.forEach(position => {
+                const choice = votes[position.id];
+                let choiceHtml = '';
+
+                if (choice === 'abstain') {
+                    choiceHtml = `<div class="text-gray-400 font-bold text-sm">Abstained</div>`;
+                } else {
+                    const candidate = position.candidates.find(c => c.id === choice);
+                    choiceHtml = `
+                        <div class="flex items-center gap-3 text-left">
+                            <img src="${candidate.photo}" style="width:40px; height:50px; object-fit:cover; border-radius:6px;" onerror="this.src='images/default.jpg';" />
+                            <div>
+                                <div class="font-bold text-gray-800 text-sm dark:text-slate-200">${candidate.name}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML += `
+                    <div class="mb-4 pb-3 border-b border-gray-100 dark:border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1">
+                        <div class="font-bold text-gray-600 text-xs uppercase dark:text-slate-400 w-40">${position.title}:</div>
+                        <div class="w-full sm:w-auto mt-1 sm:mt-0">${choiceHtml}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function submitVote() {
+            document.getElementById('loadingModal').classList.remove('hidden');
+
+            setTimeout(() => {
+                positions.forEach(position => {
+                    const choice = votes[position.id];
+                    if (choice && choice !== 'abstain') {
+                        const currentCount = JSON.parse(localStorage.getItem(`votes_${position.id}_${choice}`) || '0');
+                        localStorage.setItem(`votes_${position.id}_${choice}`, JSON.stringify(currentCount + 1));
+                    }
+                });
+
+                const votedStudents = JSON.parse(localStorage.getItem('cssa_voted') || '[]');
+                votedStudents.push(currentUser.indexNumber);
+                localStorage.setItem('cssa_voted', JSON.stringify(votedStudents));
+
+                const ref = 'CSSA-' + Math.floor(100000 + Math.random() * 900000);
+                document.getElementById('refNumber').textContent = ref;
+
+                document.getElementById('loadingModal').classList.add('hidden');
+                switchScreen('successScreen');
+            }, 1200);
+        }
+
+        function returnToHome() {
+            votes = { president: null, vicepresident: null, finsecretary: null, generalsecretary: null, womenscommissioner: null, organizer: null, pro: null, sportssecretary: null };
+            currentUser = null;
+            document.getElementById('loginForm').reset();
+            switchScreen('homeScreen');
+        }
+
+        function displayResults() {
+            const votedStudents = JSON.parse(localStorage.getItem('cssa_voted') || '[]');
+            const totalEligible = approvedStudents.length;
+            const votesCast = votedStudents.length;
+            const turnout = totalEligible ? Math.round((votesCast / totalEligible) * 100) : 0;
+
+            document.getElementById('totalVoters').textContent = totalEligible;
+            document.getElementById('votesCast').textContent = votesCast;
+            document.getElementById('turnout').textContent = turnout + '%';
+            
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.innerHTML = '';
+            
+            positions.forEach(position => {
+                const posDiv = document.createElement('div');
+                posDiv.className = 'results-chart';
+                
+                let html = `<h3 class="font-bold text-lg mb-4 pb-2 border-b border-gray-200 dark:border-slate-700 text-gray-800 dark:text-white">${position.title}</h3>`;
+                
+                position.candidates.filter(c => c.name !== "").forEach(candidate => {
+                    const count = JSON.parse(localStorage.getItem(`votes_${position.id}_${candidate.id}`) || '0');
+                    const percentage = votesCast > 0 ? Math.round((count / votesCast) * 100) : 0;
+                    
+                    html += `
+                        <div class="mb-4 p-3 rounded-xl bg-gray-50 dark:bg-slate-800/40 border border-gray-100 dark:border-slate-700/50 flex gap-3 items-center">
+                            <img src="${candidate.photo}" style="width: 50px; height: 60px; object-fit: cover;" class="rounded shadow-sm bg-gray-200 shrink-0" onerror="this.src='images/default.jpg';" />
+                            <div class="flex-grow min-w-0">
+                                <div class="flex justify-between items-baseline mb-1 flex-wrap">
+                                    <span class="font-bold text-sm text-gray-800 dark:text-slate-200 truncate pr-2">${candidate.name}</span>
+                                    <span class="text-xs font-bold text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-700 px-2 py-0.5 rounded-full shadow-xs">
+                                        ${count} (${percentage}%)
+                                    </span>
+                                </div>
+                                <div style="height: 18px; background: #e5e7eb; border-radius: 4px; overflow: hidden;" class="dark:bg-slate-700">
+                                    <div style="width: ${percentage}%; height: 100%; font-size: 11px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; background: linear-gradient(90deg, #667eea, #764ba2);">
+                                        ${percentage}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                posDiv.innerHTML = html;
+                resultsContainer.appendChild(posDiv);
+            });
+        }
+
+        function toggleFaq(element) {
+            element.classList.toggle('active');
+        }
+
+        function showAdminLogin() {
+            const pass = prompt("Enter Administrative Security Password:");
+            if (pass === "admin2026") {
+                switchScreen('adminScreen');
+            } else if (pass !== null) {
+                alert("Incorrect administration entry token.");
+            }
+        }
+
+        function refreshStats() {
+            const votedStudents = JSON.parse(localStorage.getItem('cssa_voted') || '[]');
+            const totalEligible = approvedStudents.length;
+            const votesCast = votedStudents.length;
+            const turnout = totalEligible ? Math.round((votesCast / totalEligible) * 100) : 0;
+            const remaining = totalEligible - votesCast;
+
+            document.getElementById('adminEligible').textContent = totalEligible;
+            document.getElementById('adminVotesCast').textContent = votesCast;
+            document.getElementById('adminTurnout').textContent = turnout + '%';
+            document.getElementById('adminRemaining').textContent = remaining;
+
+            const listContainer = document.getElementById('votersList');
+            listContainer.innerHTML = '';
+
+            approvedStudents.forEach(student => {
+                const hasVoted = votedStudents.includes(student.indexNumber);
+                if (hasVoted) {
+                    listContainer.innerHTML += `<div class="p-2 bg-green-50 text-green-800 rounded text-xs border border-green-200 font-medium">✓ ${student.fullName} (${student.indexNumber}) - Voted</div>`;
+                } else {
+                    listContainer.innerHTML += `<div class="p-2 bg-gray-50 text-gray-500 rounded text-xs border border-gray-200">⊘ ${student.fullName} (${student.indexNumber})</div>`;
+                }
+            });
+        }
+
+        function downloadResults() {
+            let csv = 'Position,Candidate,Votes\n';
+            positions.forEach(position => {
+                position.candidates.filter(c => c.name !== "").forEach(candidate => {
+                    const votes = JSON.parse(localStorage.getItem(`votes_${position.id}_${candidate.id}`) || '0');
+                    csv += `"${position.title}","${candidate.name}",${votes}\n`;
+                });
+            });
+            downloadCSV(csv, 'election-results.csv');
+        }
+
+        function exportVoterLog() {
+            const votedStudents = JSON.parse(localStorage.getItem('cssa_voted') || '[]');
+            let csv = 'Status,Full Name,Index Number,Timestamp\n';
+            votedStudents.forEach(id => {
+                const student = approvedStudents.find(s => s.indexNumber === id);
+                if (student) {
+                    csv += `Voted,"${student.fullName}","${student.indexNumber}","${new Date().toLocaleString()}"\n`;
+                }
+            });
+            downloadCSV(csv, 'voter-log.csv');
+        }
+
+        function downloadCSV(csv, filename) {
+            const link = document.createElement('a');
+            link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+            link.download = filename;
+            link.click();
+        }
+    </script>
+</body>
+</html>
